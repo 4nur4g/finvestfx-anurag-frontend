@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, {useState, useEffect} from "react";
 import axios from "axios";
 import {
     TableContainer,
@@ -12,7 +12,8 @@ import {
     TextField,
     Button,
 } from "@mui/material";
-import { ExpandMore, ExpandLess, ArrowUpward, ArrowDownward } from '@mui/icons-material'
+import {ExpandMore, ExpandLess, ArrowUpward, ArrowDownward} from '@mui/icons-material'
+
 const styles = {
     image: {
         width: "100px",
@@ -20,10 +21,10 @@ const styles = {
         objectFit: "cover",
         borderRadius: ".5rem"
     },
-    priceCell: {
-        display: "flex",
-        alignItems: "center",
-    },
+    ascdesc: {
+        cursor: "pointer",
+        verticalAlign: "middle"
+    }
 };
 
 
@@ -120,7 +121,8 @@ function App() {
                         <TableCell>Label</TableCell>
                         <TableCell onClick={handleSort} style={styles.priceCell}> Price
                             {/* conditionally render the icon based on the sortOrder state */}
-                            {sortOrder === "asc" ? <ArrowUpward /> : <ArrowDownward />}</TableCell>
+                            {sortOrder === "asc" ? <ArrowUpward style={styles.ascdesc}/> :
+                                <ArrowDownward style={styles.ascdesc}/>}</TableCell>
                         <TableCell>Description</TableCell>
                     </TableRow>
                 </TableHead>
@@ -132,9 +134,9 @@ function App() {
                                 <TableCell colSpan={6}>
                                     <IconButton onClick={() => handleExpand(category)}>
                                         {categories[category] ? (
-                                            <ExpandLess />
+                                            <ExpandLess/>
                                         ) : (
-                                            <ExpandMore />
+                                            <ExpandMore/>
                                         )}
                                     </IconButton>
                                     {category}
@@ -148,7 +150,7 @@ function App() {
                                         <TableRow key={product.id}>
                                             <TableCell>{product.name}</TableCell>
                                             <TableCell>
-                                                <img src={product.image} style={styles.image} alt={product.name} />
+                                                <img src={product.image} style={styles.image} alt={product.name}/>
                                             </TableCell>
                                             <TableCell>{product.category}</TableCell>
                                             <TableCell>{product.label}</TableCell>
