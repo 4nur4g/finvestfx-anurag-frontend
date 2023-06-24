@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import React, {useState, useEffect, useRef} from "react";
 import axios from "axios";
 import {
     TableContainer,
@@ -34,13 +34,44 @@ function App() {
     const [categories, setCategories] = useState({}); // state for categories and their expanded status
     const [sortOrder, setSortOrder] = useState("asc"); // state for sort order of price
 
+    const originalProducts = useRef({});
+    const currentProducts = useRef({})
+
     useEffect(() => {
-        // fetch data from db on mount
+        // check if there is any data in the session storage on mount
+        const storedProducts = sessionStorage.getItem("currentProducts");
+        const storedOriginalProducts = sessionStorage.getItem("originalProducts");
+        if (storedProducts && storedOriginalProducts) {
+            // parse the stored data and use it to initialize the states
+            const parsedProducts = JSON.parse(storedProducts);
+            const parsedOriginalProducts = JSON.parse(sessionStorage.getItem("originalProducts"));
+
+            originalProducts.current = parsedOriginalProducts;
+            currentProducts.current = parsedProducts;
+
+            setProducts(parsedProducts);
+            let initialEditPrice = {};
+            parsedProducts.forEach((product) => {
+                initialEditPrice[product.id] = product.price;
+            });
+            setEditPrice(initialEditPrice);
+            let initialCategories = {};
+            parsedProducts.forEach((product) => {
+                if (!initialCategories[product.category]) {
+                    initialCategories[product.category] = false;
+                }
+            });
+            setCategories(initialCategories);
+        } else {
         axios
             .get("http://localhost:3000/api/v1/products/")
             .then((res) => {
                 let productdata = res.data.products
                 setProducts(productdata);
+                originalProducts.current = productdata;
+                currentProducts.current = productdata;
+                sessionStorage.setItem("originalProducts", JSON.stringify(productdata));
+                sessionStorage.setItem("currentProducts", JSON.stringify(productdata));
                 let initialEditPrice = {};
                 productdata.forEach((product) => {
                     if (!initialEditPrice[product.id]) {
@@ -59,7 +90,7 @@ function App() {
             })
             .catch((err) => {
                 console.error(err);
-            });
+            })};
     }, []);
 
     const handleExpand = (category) => {
@@ -86,12 +117,24 @@ function App() {
                 price: editPrice[product.id],
             }))
         );
+        // save the updated products data to the session storage as well
+        sessionStorage.setItem(
+            "currentProducts",
+            JSON.stringify(
+                products.map((product) => ({
+                    ...product,
+                    price: editPrice[product.id],
+                }))
+            )
+        );
     };
 
     const handleReset = () => {
-        // reset the editPrice state to the original price values
+        // reset the products and editPrice states to the original values from the useRef variable
+        setProducts(originalProducts.current);
+        sessionStorage.setItem("currentProducts", JSON.stringify(originalProducts.current));
         let resetEditPrice = {};
-        products.forEach((product) => {
+        originalProducts.current.forEach((product) => {
             resetEditPrice[product.id] = product.price;
         });
         setEditPrice(resetEditPrice);
