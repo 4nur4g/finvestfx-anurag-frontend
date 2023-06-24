@@ -1,18 +1,18 @@
-import React, {useState, useEffect, useRef} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import axios from "axios";
 import {
-    TableContainer,
-    Table,
-    TableHead,
-    TableBody,
-    TableRow,
-    TableCell,
-    Paper,
-    IconButton,
-    TextField,
     Button,
+    IconButton,
+    Paper,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    TextField,
 } from "@mui/material";
-import {ExpandMore, ExpandLess, ArrowUpward, ArrowDownward} from '@mui/icons-material'
+import {ArrowDownward, ArrowUpward, ExpandLess, ExpandMore} from '@mui/icons-material'
 
 const styles = {
     image: {
@@ -35,7 +35,6 @@ function App() {
     const [sortOrder, setSortOrder] = useState("asc"); // state for sort order of price
 
     const originalProducts = useRef({});
-    const currentProducts = useRef({})
 
     useEffect(() => {
         // check if there is any data in the session storage on mount
@@ -44,10 +43,7 @@ function App() {
         if (storedProducts && storedOriginalProducts) {
             // parse the stored data and use it to initialize the states
             const parsedProducts = JSON.parse(storedProducts);
-            const parsedOriginalProducts = JSON.parse(sessionStorage.getItem("originalProducts"));
-
-            originalProducts.current = parsedOriginalProducts;
-            currentProducts.current = parsedProducts;
+            originalProducts.current = JSON.parse(sessionStorage.getItem("originalProducts"));
 
             setProducts(parsedProducts);
             let initialEditPrice = {};
@@ -69,7 +65,6 @@ function App() {
                 let productdata = res.data.products
                 setProducts(productdata);
                 originalProducts.current = productdata;
-                currentProducts.current = productdata;
                 sessionStorage.setItem("originalProducts", JSON.stringify(productdata));
                 sessionStorage.setItem("currentProducts", JSON.stringify(productdata));
                 let initialEditPrice = {};
@@ -90,7 +85,7 @@ function App() {
             })
             .catch((err) => {
                 console.error(err);
-            })};
+            })}
     }, []);
 
     const handleExpand = (category) => {
