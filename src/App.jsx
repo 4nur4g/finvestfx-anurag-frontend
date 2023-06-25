@@ -3,7 +3,7 @@ import axios from "axios";
 import {
     Button,
     IconButton,
-    Paper,
+    Paper, Snackbar,
     Table,
     TableBody,
     TableCell,
@@ -33,6 +33,10 @@ function App() {
     const [editPrice, setEditPrice] = useState({}); // state for edited price values
     const [categories, setCategories] = useState({}); // state for categories and their expanded status
     const [sortOrder, setSortOrder] = useState("asc"); // state for sort order of price
+
+    // state for controlling the snackbar open/close
+    const [open, setOpen] = useState(false);
+    const [message,setMessage] = useState("");
 
     const originalProducts = useRef({});
 
@@ -122,6 +126,8 @@ function App() {
                 }))
             )
         );
+        setMessage("Price saved successfully");
+        handleOpen()
     };
 
     const handleReset = () => {
@@ -133,6 +139,8 @@ function App() {
             resetEditPrice[product.id] = product.price;
         });
         setEditPrice(resetEditPrice);
+        setMessage("Price reset successfully");
+        handleOpen()
     };
 
     const handleSort = () => {
@@ -146,6 +154,16 @@ function App() {
             setSortOrder("asc");
         }
         setProducts(sortedProducts);
+    }
+
+    // function to handle opening the snackbar
+    const handleOpen = () => {
+        setOpen(true);
+    };
+
+    // function to handle closing the snackbar
+    const handleClose = () => {
+        setOpen(false);
     };
 
     return (
@@ -211,6 +229,18 @@ function App() {
             {/* render save and reset buttons */}
             <Button onClick={handleSave}>Save</Button>
             <Button onClick={handleReset}>Reset</Button>
+            <Snackbar
+                anchorOrigin = {{vertical: "top", horizontal: "right"}}
+                open={open}
+                autoHideDuration={1500}
+                onClose={handleClose}
+                message={message}
+                action={
+                    <Button size="small" onClick={handleClose}>
+                        OK
+                    </Button>
+                }
+            />
         </TableContainer>
     )
 }
