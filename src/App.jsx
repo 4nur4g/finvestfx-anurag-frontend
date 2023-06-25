@@ -1,7 +1,8 @@
 import React, {useEffect, useRef, useState} from "react";
 import axios from "axios";
 import {
-    Button,
+    Box,
+    Button, Fab,
     IconButton,
     Paper, Snackbar,
     Table,
@@ -36,7 +37,7 @@ function App() {
 
     // state for controlling the snackbar open/close
     const [open, setOpen] = useState(false);
-    const [message,setMessage] = useState("");
+    const [message, setMessage] = useState("");
 
     const originalProducts = useRef({});
 
@@ -63,33 +64,34 @@ function App() {
             });
             setCategories(initialCategories);
         } else {
-        axios
-            .get("http://localhost:3000/api/v1/products/")
-            .then((res) => {
-                let productdata = res.data.products
-                setProducts(productdata);
-                originalProducts.current = productdata;
-                sessionStorage.setItem("originalProducts", JSON.stringify(productdata));
-                sessionStorage.setItem("currentProducts", JSON.stringify(productdata));
-                let initialEditPrice = {};
-                productdata.forEach((product) => {
-                    if (!initialEditPrice[product.id]) {
-                        initialEditPrice[product.id] = product.price;
-                    }
-                });
-                setEditPrice(initialEditPrice);
-                // initialize categories state with unique categories and false expanded status
-                let initialCategories = {};
-                productdata.forEach((product) => {
-                    if (!initialCategories[product.category]) {
-                        initialCategories[product.category] = false;
-                    }
-                });
-                setCategories(initialCategories);
-            })
-            .catch((err) => {
-                console.error(err);
-            })}
+            axios
+                .get("http://localhost:3000/api/v1/products/")
+                .then((res) => {
+                    let productdata = res.data.products
+                    setProducts(productdata);
+                    originalProducts.current = productdata;
+                    sessionStorage.setItem("originalProducts", JSON.stringify(productdata));
+                    sessionStorage.setItem("currentProducts", JSON.stringify(productdata));
+                    let initialEditPrice = {};
+                    productdata.forEach((product) => {
+                        if (!initialEditPrice[product.id]) {
+                            initialEditPrice[product.id] = product.price;
+                        }
+                    });
+                    setEditPrice(initialEditPrice);
+                    // initialize categories state with unique categories and false expanded status
+                    let initialCategories = {};
+                    productdata.forEach((product) => {
+                        if (!initialCategories[product.category]) {
+                            initialCategories[product.category] = false;
+                        }
+                    });
+                    setCategories(initialCategories);
+                })
+                .catch((err) => {
+                    console.error(err);
+                })
+        }
     }, []);
 
     const handleExpand = (category) => {
@@ -166,71 +168,78 @@ function App() {
         setOpen(false);
     };
 
-    return (
-        <TableContainer component={Paper}>
-            <Table>
-                <TableHead>
-                    <TableRow>
-                        <TableCell>Name</TableCell>
-                        <TableCell>Image</TableCell>
-                        <TableCell>Category</TableCell>
-                        <TableCell>Label</TableCell>
-                        <TableCell onClick={handleSort} style={styles.priceCell}> Price
-                            {/* conditionally render the icon based on the sortOrder state */}
-                            {sortOrder === "asc" ? <ArrowUpward style={styles.ascdesc}/> :
-                                <ArrowDownward style={styles.ascdesc}/>}</TableCell>
-                        <TableCell>Description</TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    {Object.keys(categories).map((category) => (
-                        <React.Fragment key={category}>
-                            {/* render a category row with expand/collapse icon */}
-                            <TableRow>
-                                <TableCell colSpan={6}>
-                                    <IconButton onClick={() => handleExpand(category)}>
-                                        {categories[category] ? (
-                                            <ExpandLess/>
-                                        ) : (
-                                            <ExpandMore/>
-                                        )}
-                                    </IconButton>
-                                    {category}
-                                </TableCell>
-                            </TableRow>
-                            {/* render the products of the category if expanded */}
-                            {categories[category] &&
-                                products
-                                    .filter((product) => product.category === category)
-                                    .map((product) => (
-                                        <TableRow key={product.id}>
-                                            <TableCell>{product.name}</TableCell>
-                                            <TableCell>
-                                                <img src={product.image} style={styles.image} alt={product.name}/>
-                                            </TableCell>
-                                            <TableCell>{product.category}</TableCell>
-                                            <TableCell>{product.label}</TableCell>
-                                            {/* render a text field for editing price */}
-                                            <TableCell>
-                                                <TextField
-                                                    value={editPrice[product.id]}
-                                                    onChange={(e) =>
-                                                        handleChange(product.id, e.target.value)
-                                                    }
-                                                />
-                                            </TableCell>
-                                            <TableCell>{product.description}</TableCell>
-                                        </TableRow>
-                                    ))}
-                        </React.Fragment>
-                    ))}
-                </TableBody>
-            </Table>
-            {/* render save and reset buttons */}
-            <Button onClick={handleSave}>Save</Button>
-            <Button onClick={handleReset}>Reset</Button>
+    return (<>
+            <TableContainer component={Paper}>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>Name</TableCell>
+                            <TableCell>Image</TableCell>
+                            <TableCell>Category</TableCell>
+                            <TableCell>Label</TableCell>
+                            <TableCell onClick={handleSort} style={styles.priceCell}> Price
+                                {/* conditionally render the icon based on the sortOrder state */}
+                                {sortOrder === "asc" ? <ArrowUpward style={styles.ascdesc}/> :
+                                    <ArrowDownward style={styles.ascdesc}/>}</TableCell>
+                            <TableCell>Description</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {Object.keys(categories).map((category) => (
+                            <React.Fragment key={category}>
+                                {/* render a category row with expand/collapse icon */}
+                                <TableRow>
+                                    <TableCell colSpan={6}>
+                                        <IconButton onClick={() => handleExpand(category)}>
+                                            {categories[category] ? (
+                                                <ExpandLess/>
+                                            ) : (
+                                                <ExpandMore/>
+                                            )}
+                                        </IconButton>
+                                        {category}
+                                    </TableCell>
+                                </TableRow>
+                                {/* render the products of the category if expanded */}
+                                {categories[category] &&
+                                    products
+                                        .filter((product) => product.category === category)
+                                        .map((product) => (
+                                            <TableRow key={product.id}>
+                                                <TableCell>{product.name}</TableCell>
+                                                <TableCell>
+                                                    <img src={product.image} style={styles.image} alt={product.name}/>
+                                                </TableCell>
+                                                <TableCell>{product.category}</TableCell>
+                                                <TableCell>{product.label}</TableCell>
+                                                {/* render a text field for editing price */}
+                                                <TableCell>
+                                                    <TextField
+                                                        value={editPrice[product.id]}
+                                                        onChange={(e) =>
+                                                            handleChange(product.id, e.target.value)
+                                                        }
+                                                    />
+                                                </TableCell>
+                                                <TableCell>{product.description}</TableCell>
+                                            </TableRow>
+                                        ))}
+                            </React.Fragment>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+            <Box sx={{
+                position: 'fixed',
+                bottom: "2rem",
+                right: "2rem",
+            }}>
+                <Fab variant="extended" size="medium" color="primary" onClick={handleSave}
+                     sx={{right: "1rem"}}>Save</Fab>
+                <Fab variant="extended" size="medium" color="primary" onClick={handleReset}>Reset</Fab>
+            </Box>
             <Snackbar
-                anchorOrigin = {{vertical: "top", horizontal: "right"}}
+                anchorOrigin={{vertical: "top", horizontal: "right"}}
                 open={open}
                 autoHideDuration={1500}
                 onClose={handleClose}
@@ -241,7 +250,7 @@ function App() {
                     </Button>
                 }
             />
-        </TableContainer>
+        </>
     )
 }
 
